@@ -1,3 +1,4 @@
-# pwestora
+# pwestora_jm
 
-A new Flutter project.
+Commercial Property Rental & Lease Management System (Flutter Mobile App & PHP Web Portal).
+
