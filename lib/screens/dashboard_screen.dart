@@ -237,169 +237,283 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
 
-                  // TOP HERO SECTION (Full-Width Gradient Header with Watermark)
-                  Stack(
-                    children: [
-                      Positioned(
-                        right: -15,
-                        top: -10,
-                        child: Icon(
-                          Icons.apartment_rounded,
-                          size: 150,
-                          color: Colors.white.withValues(alpha: 0.06),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Row 1: Active Lease Pill + Good Standing Pill
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // TOP HERO SECTION (Full-Width Property Image Header with Dark Contrast Scrim)
+                  Builder(
+                    builder: (context) {
+                      final coverPhoto = widget.lease['cover_photo']?.toString();
+                      final hasPhoto = coverPhoto != null && coverPhoto.trim().isNotEmpty;
+
+                      return Stack(
+                        children: [
+                          // Background Property Image (if available)
+                          if (hasPhoto)
+                            Positioned.fill(
+                              child: Image.network(
+                                coverPhoto,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                              ),
+                            ),
+
+                          // Dark Gradient Scrim to guarantee 100% text readability
+                          Positioned.fill(
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    hasPhoto
+                                        ? const Color(0xD90A1728) // Deep dark navy 85% opacity
+                                        : AppColors.primary,
+                                    hasPhoto
+                                        ? const Color(0xEE102340) // Navy 93% opacity
+                                        : AppColors.primary,
+                                    const Color(0xFF102340), // Solid Navy at bottom join
+                                  ],
+                                  stops: const [0.0, 0.45, 1.0],
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // Fallback watermark icon if no photo
+                          if (!hasPhoto)
+                            Positioned(
+                              right: -15,
+                              top: -10,
+                              child: Icon(
+                                Icons.apartment_rounded,
+                                size: 150,
+                                color: Colors.white.withValues(alpha: 0.06),
+                              ),
+                            ),
+
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                InkWell(
-                                  borderRadius: BorderRadius.circular(999),
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => const LeaseContractScreen(),
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withValues(alpha: 0.18),
+                                // Row 1: Active Lease Pill + Good Standing Pill
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    InkWell(
                                       borderRadius: BorderRadius.circular(999),
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) => const LeaseContractScreen(),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withValues(alpha: 0.22),
+                                          borderRadius: BorderRadius.circular(999),
+                                          border: Border.all(color: Colors.white30, width: 1),
+                                        ),
+                                        child: const Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              'ACTIVE LEASE',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 11,
+                                                letterSpacing: 0.5,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
+                                            SizedBox(width: 4),
+                                            Icon(Icons.chevron_right_rounded, color: Colors.white, size: 14),
+                                          ],
+                                        ),
+                                      ),
                                     ),
-                                    child: const Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          'ACTIVE LEASE',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 11,
-                                            letterSpacing: 0.5,
-                                            fontWeight: FontWeight.w800,
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.success.withValues(alpha: 0.35),
+                                        borderRadius: BorderRadius.circular(999),
+                                        border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.5), width: 1),
+                                      ),
+                                      child: const Row(
+                                        children: [
+                                          Icon(Icons.circle, size: 8, color: Colors.greenAccent),
+                                          SizedBox(width: 6),
+                                          Text(
+                                            'Good Standing',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 18),
+
+                                // Property Info with Thumbnail Preview
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    if (hasPhoto) ...[
+                                      Container(
+                                        width: 54,
+                                        height: 54,
+                                        margin: const EdgeInsets.only(right: 14),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 1.5),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: 0.3),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        clipBehavior: Clip.antiAlias,
+                                        child: Image.network(
+                                          coverPhoto,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) => Container(
+                                            color: AppColors.primaryLight,
+                                            child: const Icon(Icons.storefront_rounded, color: Colors.white70),
                                           ),
                                         ),
-                                        SizedBox(width: 4),
-                                        Icon(Icons.chevron_right_rounded, color: Colors.white70, size: 14),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.success.withValues(alpha: 0.25),
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  child: const Row(
-                                    children: [
-                                      Icon(Icons.circle, size: 8, color: Colors.greenAccent),
-                                      SizedBox(width: 6),
-                                      Text(
-                                        'Good Standing',
-                                        style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
                                       ),
                                     ],
-                                  ),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            widget.lease['property_name']?.toString() ?? 'pwestora',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.w900,
+                                              letterSpacing: -0.4,
+                                              shadows: [
+                                                Shadow(
+                                                  color: Colors.black87,
+                                                  blurRadius: 4,
+                                                  offset: Offset(0, 1),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              const Icon(Icons.location_on_outlined, size: 15, color: Color(0xFFD6E4F0)),
+                                              const SizedBox(width: 4),
+                                              Expanded(
+                                                child: Text(
+                                                  widget.lease['property_address']?.toString() ?? 'Bacolod City',
+                                                  style: const TextStyle(
+                                                    color: Color(0xFFD6E4F0),
+                                                    fontSize: 13.5,
+                                                    fontWeight: FontWeight.w600,
+                                                    shadows: [
+                                                      Shadow(
+                                                        color: Colors.black54,
+                                                        blurRadius: 3,
+                                                        offset: Offset(0, 1),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 22),
+
+                                // Monthly Rent & Lessor Row
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'MONTHLY RENT',
+                                          style: TextStyle(
+                                            color: Color(0xFFBACBDA),
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.8,
+                                            shadows: [
+                                              Shadow(color: Colors.black87, blurRadius: 3, offset: Offset(0, 1)),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '₱${_formatMoney(rent)}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 26,
+                                            fontWeight: FontWeight.w900,
+                                            letterSpacing: -0.5,
+                                            shadows: [
+                                              Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(0, 1)),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        const Text(
+                                          'LESSOR',
+                                          style: TextStyle(
+                                            color: Color(0xFFBACBDA),
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.8,
+                                            shadows: [
+                                              Shadow(color: Colors.black87, blurRadius: 3, offset: Offset(0, 1)),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          widget.lease['lessor_name']?.toString() ?? 'Secret',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w800,
+                                            shadows: [
+                                              Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(0, 1)),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                    const SizedBox(height: 18),
-
-                    // Property Name
-                    Text(
-                      widget.lease['property_name']?.toString() ?? 'pwestora',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-
-                    // Address / Location
-                    Row(
-                      children: [
-                        const Icon(Icons.location_on_outlined, size: 15, color: AppColors.tint),
-                        const SizedBox(width: 4),
-                        Text(
-                          widget.lease['property_address']?.toString() ?? 'dss',
-                          style: const TextStyle(
-                            color: AppColors.tint,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Monthly Rent & Lessor Row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'MONTHLY RENT',
-                              style: TextStyle(
-                                color: AppColors.tint,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.6,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '₱${_formatMoney(rent)}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 26,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            const Text(
-                              'LESSOR',
-                              style: TextStyle(
-                                color: AppColors.tint,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.6,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              widget.lease['lessor_name']?.toString() ?? 'Secret',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+                        ],
+                      );
+                    },
+                  ),
 
               // CURVED SHEET CONTAINER (Overlapping Card Area)
               Container(
